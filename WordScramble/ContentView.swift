@@ -8,6 +8,8 @@ import SwiftUI
 
 struct ContentView: View {
     
+    @State private var score = 0
+    
     @State private var usedWords = [String]()
     @State private var rootWord = ""
     @State private var newWord = ""
@@ -30,6 +32,7 @@ struct ContentView: View {
                         HStack {
                             Image(systemName: "\(word.count).circle")
                             Text(word)
+                            
                         }
                     }
                 }
@@ -38,6 +41,9 @@ struct ContentView: View {
                 Button("Restart") {
                     startGame()
                 }
+            }
+            .toolbar {
+                Text("Score: \(score)")
             }
             .navigationTitle(rootWord)
             .onSubmit(addNewWord)
@@ -79,7 +85,7 @@ struct ContentView: View {
             wordError(title: "Word already given", message: "Don't try to cheat the system!")
             return
         }
-
+        scoreAdd(word: answer)
         withAnimation {
             usedWords.insert(answer, at: 0)
         }
@@ -91,6 +97,9 @@ struct ContentView: View {
             if let startWords = try? String(contentsOf: startWordsURL, encoding:.utf8) {
                 let allWords = startWords.components(separatedBy: "\n")
                 rootWord = allWords.randomElement() ?? "silkworm"
+                score = 0
+                usedWords.removeAll()
+                
                 return
             }
         }
@@ -139,6 +148,9 @@ struct ContentView: View {
         rootWord != word
     }
     
+    func scoreAdd(word: String) {
+        self.score += word.count
+    }
 }
 
 #Preview {
