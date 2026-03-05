@@ -8,7 +8,10 @@ import SwiftUI
 
 struct ContentView: View {
     
+    @FocusState private var isFieldFocused: Bool
+    
     @State private var score = 0
+    @State private var highScore = 0
     
     @State private var usedWords = [String]()
     @State private var rootWord = ""
@@ -24,27 +27,78 @@ struct ContentView: View {
             List {
                 Section {
                     TextField("Enter your word", text: $newWord)
+                    .focused($isFieldFocused)
+                        .onSubmit {
+                            // Keep the keyboard up by setting focus back to true
+                            isFieldFocused = true
+                        }
                     .textInputAutocapitalization(.never)
+                    .onAppear {
+                        isFieldFocused = true
+                    }
                 }
 
                 Section {
                     ForEach(usedWords, id: \.self) { word in
-                        HStack {
-                            Image(systemName: "\(word.count).circle")
-                            Text(word)
+                        ZStack {
                             
+                            if word.count == 3 {
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(Color.yellow)
+                            }
+                            
+                            if word.count == 4 {
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(Color.yellow)
+                            }
+                            
+                            if word.count == 5 {
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(Color.green)
+                            }
+                            
+                            if word.count == 6 {
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(Color.blue)
+                            }
+                            
+                            if word.count == 7 {
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(Color.purple)
+                            }
+                            
+                            if word.count == 8 {
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(Color.purple)
+                            }
+                            
+                            
+                            
+                            
+                            HStack {
+                                Image(systemName: "\(word.count).circle")
+                                Text(word)
+            
+                            }
                         }
                     }
                 }
             }
             .toolbar {
-                Button("Restart") {
+                Button("Restart", systemImage: "arrow.clockwise") {
                     startGame()
                 }
             }
             .toolbar {
                 Text("Score: \(score)")
             }
+            
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                        Text("High score: \(highScore)")
+                }
+            }
+            
             .navigationTitle(rootWord)
             .onSubmit(addNewWord)
             .onAppear(perform: startGame)
@@ -62,7 +116,7 @@ struct ContentView: View {
         guard answer.count > 0 else { return }
         
         guard isOriginal(word: answer) else {
-            wordError(title: "Word used already", message: "Be more original")
+            wordError(title: "Word used already", message: "Be more original!")
             return
         }
 
@@ -85,7 +139,10 @@ struct ContentView: View {
             wordError(title: "Word already given", message: "Don't try to cheat the system!")
             return
         }
+        
         scoreAdd(word: answer)
+        highScoreAdd(word: answer)
+
         withAnimation {
             usedWords.insert(answer, at: 0)
         }
@@ -103,7 +160,6 @@ struct ContentView: View {
                 return
             }
         }
-        // If were are *here* then there was a problem – trigger a crash and report the error
         fatalError("Could not load start.txt from bundle.")
     }
         
@@ -139,7 +195,6 @@ struct ContentView: View {
         showingError = true
     }
     
-    
     func isLong(word: String) -> Bool{
         word.count >= 3
     }
@@ -150,6 +205,13 @@ struct ContentView: View {
     
     func scoreAdd(word: String) {
         self.score += word.count
+
+    }
+    
+    func highScoreAdd(word: String) {
+        if score >= highScore {
+            highScore = score
+        }
     }
 }
 
